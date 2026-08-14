@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { geocodificarDireccion } from "./geocoding";
 import {
   CATEGORIAS_VALIDAS,
   type CategoriaReporte,
@@ -50,8 +51,8 @@ export async function crearReporte(input: {
     throw new ReporteError("Falta describir qué está pasando.");
   }
 
-  const lat = input.lat != null && input.lat !== "" ? Number(input.lat) : null;
-  const lon = input.lon != null && input.lon !== "" ? Number(input.lon) : null;
+  let lat = input.lat != null && input.lat !== "" ? Number(input.lat) : null;
+  let lon = input.lon != null && input.lon !== "" ? Number(input.lon) : null;
   if ((lat != null && Number.isNaN(lat)) || (lon != null && Number.isNaN(lon))) {
     throw new ReporteError("Ubicación inválida.");
   }
@@ -61,6 +62,18 @@ export async function crearReporte(input: {
   const contact = limpiar(input.contact, 80);
   const category = input.category as CategoriaReporte;
   const ahora = new Date().toISOString();
+
+  // Si no llegó ubicación por GPS pero sí escribieron una dirección,
+  // calculamos las coordenadas a partir del texto para poder ubicarlo en
+  // el mapa igual. Si la dirección no se puede geocodificar, el reporte
+  // se sigue creando (solo queda sin pin en el mapa).
+  if (lat == null && lon == null && locationLabel) {
+    const geo = await geocodificarDireccion(locationLabel);
+    if (geo) {
+      lat = geo.lat;
+      lon = geo.lon;
+    }
+  }
 
   const sql = await db();
   const [fila] = await sql`

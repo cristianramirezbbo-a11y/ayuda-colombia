@@ -121,7 +121,7 @@ export default function NuevoAcopioForm() {
           name="locationLabel"
           required
           maxLength={100}
-          placeholder="Dirección o punto de referencia (ej. Calle 80 #45-12, Bogotá)"
+          placeholder="Dirección (ej. Calle 80 #45-12, Bogotá) — se ubica en el mapa automáticamente"
           className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
       </div>

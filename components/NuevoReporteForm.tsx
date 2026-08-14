@@ -156,7 +156,7 @@ export default function NuevoReporteForm() {
         <input
           name="locationLabel"
           maxLength={100}
-          placeholder="O describe el lugar (ej. Barrio, ciudad)"
+          placeholder="O escribe la dirección (ej. Calle 80 #45-12, Bogotá) — también se ubica en el mapa"
           className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
       </div>

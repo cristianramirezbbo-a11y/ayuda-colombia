@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { db } from "./db";
+import { geocodificarDireccion } from "./geocoding";
 import {
   ESTADOS_ACOPIO_VALIDOS,
   type Acopio,
@@ -50,8 +51,8 @@ export async function crearAcopio(input: {
     throw new AcopioError("Falta el nombre del punto de acopio.");
   }
 
-  const lat = input.lat != null && input.lat !== "" ? Number(input.lat) : null;
-  const lon = input.lon != null && input.lon !== "" ? Number(input.lon) : null;
+  let lat = input.lat != null && input.lat !== "" ? Number(input.lat) : null;
+  let lon = input.lon != null && input.lon !== "" ? Number(input.lon) : null;
   if ((lat != null && Number.isNaN(lat)) || (lon != null && Number.isNaN(lon))) {
     throw new AcopioError("Ubicación inválida.");
   }
@@ -62,6 +63,16 @@ export async function crearAcopio(input: {
   const contact = limpiar(input.contact, 80);
   const managementToken = generarToken();
   const ahora = new Date().toISOString();
+
+  // Igual que en reportes: si no hay GPS pero sí una dirección escrita,
+  // la geocodificamos para poder mostrar el acopio en el mapa.
+  if (lat == null && lon == null && locationLabel) {
+    const geo = await geocodificarDireccion(locationLabel);
+    if (geo) {
+      lat = geo.lat;
+      lon = geo.lon;
+    }
+  }
 
   const sql = await db();
   const [fila] = await sql`
