@@ -40,8 +40,12 @@ function getSnapshot(): ChecklistState {
   return cache;
 }
 
+const ESTADO_INICIAL: ChecklistState = {};
+
 function getServerSnapshot(): ChecklistState {
-  return {};
+  // Debe devolver siempre la misma referencia para que React no detecte
+  // un "cambio" y entre en bucle de render durante la hidratación.
+  return ESTADO_INICIAL;
 }
 
 function subscribe(onStoreChange: () => void): () => void {
@@ -71,32 +75,56 @@ export default function MochilaChecklist() {
   const total = ITEMS.length;
   const done = ITEMS.filter((item) => checked[item]).length;
 
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-800">
-          Mochila de emergencia
-        </h3>
-        <span className="text-xs text-slate-500">
-          {done}/{total}
-        </span>
+    <div className="card overflow-hidden">
+      <div className="border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-800">
+            Mochila de emergencia
+          </h3>
+          <span className="text-xs font-semibold text-slate-500">
+            {done}/{total}{done === total && " · ¡Lista!"}
+          </span>
+        </div>
+        <div
+          className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={done}
+          aria-label="Progreso de la mochila de emergencia"
+        >
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${
+              done === total ? "bg-emerald-500" : "bg-red-500"
+            }`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
       </div>
-      <ul className="space-y-2">
-        {ITEMS.map((item) => (
-          <li key={item}>
-            <label className="flex items-start gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={Boolean(checked[item])}
-                onChange={() => toggleItem(item, checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300"
-              />
-              <span className={checked[item] ? "text-slate-400 line-through" : ""}>
-                {item}
-              </span>
-            </label>
-          </li>
-        ))}
+      <ul className="space-y-1 p-4">
+        {ITEMS.map((item) => {
+          const hecho = Boolean(checked[item]);
+          return (
+            <li key={item}>
+              <label
+                className={`-mx-2 flex cursor-pointer items-start gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors ${
+                  hecho ? "text-slate-400" : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={hecho}
+                  onChange={() => toggleItem(item, checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 accent-red-600"
+                />
+                <span className={hecho ? "line-through" : ""}>{item}</span>
+              </label>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

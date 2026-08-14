@@ -98,6 +98,22 @@ export async function obtenerAcopioPorId(id: number): Promise<Acopio | null> {
   return fila ? filaAAcopio(fila) : null;
 }
 
+/**
+ * Verifica si un código de gestión corresponde a un acopio. Se usa antes de
+ * "desbloquear" el panel: si el código es incorrecto no se debe mostrar el
+ * panel de administración, porque luego los cambios fallarían en silencio.
+ */
+export async function codigoEsValido(
+  id: number,
+  managementToken: string,
+): Promise<boolean> {
+  const sql = await db();
+  const [fila] = await sql`
+    SELECT 1 FROM acopios WHERE id = ${id} AND management_token = ${managementToken}
+  `;
+  return Boolean(fila);
+}
+
 /** Actualiza el estado; lanza si el código de gestión no coincide. */
 export async function actualizarEstadoAcopio(
   id: number,

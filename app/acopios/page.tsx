@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import AcopiosExplorer from "@/components/AcopiosExplorer";
 import { listarAcopios } from "@/lib/acopios";
+import type { Acopio } from "@/lib/acopios-types";
+import { IconPlus, IconAlert } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Centros de acopio — Sismos Colombia",
@@ -13,38 +15,49 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AcopiosPage() {
-  const acopios = await listarAcopios();
+  let acopios: Acopio[] = [];
+  let dbError = false;
+  try {
+    acopios = await listarAcopios();
+  } catch {
+    dbError = true;
+  }
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <NavBar />
-      <header className="bg-slate-900 text-white">
-        <div className="mx-auto max-w-5xl px-4 py-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold">Centros de acopio</h1>
-              <p className="text-sm text-slate-300">
-                Puntos de ayuda humanitaria con estado actualizado.
-              </p>
-            </div>
-            <Link
-              href="/acopios/nuevo"
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white"
-            >
-              + Registrar acopio
-            </Link>
-          </div>
-        </div>
-      </header>
+    <main>
+      <PageHeader
+        title="Centros de acopio"
+        subtitle="Puntos de ayuda humanitaria con estado actualizado."
+        actions={
+          <Link href="/acopios/nuevo" className="btn-primary">
+            <IconPlus className="h-4 w-4" />
+            Registrar acopio
+          </Link>
+        }
+      />
 
       <section className="mx-auto max-w-5xl space-y-4 px-4 py-6">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800">
-          Cualquiera puede registrar un punto de acopio. No están verificados
-          por ninguna autoridad — confirma antes de movilizarte. Quien lo crea
-          recibe un código para mantener su estado actualizado.
+        <div className="alert-warn flex items-start gap-3">
+          <IconAlert className="mt-0.5 h-5 w-5 shrink-0" />
+          <span>
+            Cualquiera puede registrar un punto de acopio. No están verificados
+            por ninguna autoridad — confirma antes de movilizarte. Quien lo crea
+            recibe un código para mantener su estado actualizado.
+          </span>
         </div>
 
-        <AcopiosExplorer acopios={acopios} />
+        {dbError && (
+          <div className="alert-error flex items-start gap-3">
+            <IconAlert className="mt-0.5 h-5 w-5 shrink-0" />
+            <span>
+              <strong>No se pudieron cargar los acopios.</strong> La base de
+              datos no está respondiendo. Reintenta en un momento; mientras
+              tanto, en una emergencia llama al <strong>123</strong>.
+            </span>
+          </div>
+        )}
+
+        <AcopiosExplorer acopios={acopios} dbError={dbError} />
       </section>
     </main>
   );

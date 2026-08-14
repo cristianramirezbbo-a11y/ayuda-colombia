@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import RegisterServiceWorker from "./register-sw";
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,9 +43,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es-CO"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-dvh flex-col bg-slate-50 pb-16 md:pb-0">
         <RegisterServiceWorker />
-        {children}
+        <NavBar />
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

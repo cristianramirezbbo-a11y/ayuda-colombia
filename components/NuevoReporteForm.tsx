@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { CATEGORIA_INFO, type CategoriaReporte } from "@/lib/reportes-types";
 import { crearReporteAction } from "@/app/reportes/actions";
+import {
+  IconMapPin,
+  IconCheck,
+  IconAlert,
+  IconSend,
+} from "./icons";
 
 const CATEGORIAS: CategoriaReporte[] = [
   "necesito_ayuda",
@@ -55,12 +61,10 @@ export default function NuevoReporteForm() {
   return (
     <form
       action={crearReporteAction}
-      className="space-y-4 rounded-xl border border-slate-200 bg-white p-4"
+      className="card space-y-5 p-4 sm:p-6"
     >
       <div>
-        <label className="mb-2 block text-xs font-medium text-slate-600">
-          ¿Qué tipo de reporte es?
-        </label>
+        <label className="label">¿Qué tipo de reporte es?</label>
         <div className="grid grid-cols-2 gap-2">
           {CATEGORIAS.map((cat) => {
             const c = CATEGORIA_INFO[cat];
@@ -68,10 +72,14 @@ export default function NuevoReporteForm() {
             return (
               <label
                 key={cat}
-                className={`cursor-pointer rounded-lg border px-3 py-2 text-center text-sm font-medium ${
-                  activo ? "text-white" : "border-slate-300 text-slate-700"
+                className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
+                  activo
+                    ? "text-white shadow-sm"
+                    : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
                 }`}
-                style={activo ? { backgroundColor: c.color, borderColor: c.color } : undefined}
+                style={
+                  activo ? { backgroundColor: c.color, borderColor: c.color } : undefined
+                }
               >
                 <input
                   type="radio"
@@ -83,6 +91,7 @@ export default function NuevoReporteForm() {
                   required
                 />
                 {c.label}
+                {activo && <IconCheck className="h-4 w-4 shrink-0" />}
               </label>
             );
           })}
@@ -90,23 +99,25 @@ export default function NuevoReporteForm() {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">
+        <label htmlFor="titulo" className="label">
           {categoria === "desaparecido" ? "Nombre de la persona" : "¿Qué está pasando?"}
         </label>
         <input
+          id="titulo"
           name="title"
           required
           maxLength={120}
           placeholder={info.placeholder}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="input"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">
+        <label htmlFor="detalles" className="label">
           Detalles (opcional)
         </label>
         <textarea
+          id="detalles"
           name="description"
           maxLength={500}
           rows={3}
@@ -115,32 +126,38 @@ export default function NuevoReporteForm() {
               ? "Última vez que se le vio, señas particulares..."
               : "Cualquier detalle que ayude a otros a actuar"
           }
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="input resize-y"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">
-          Ubicación
-        </label>
+        <label className="label">Ubicación</label>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={usarMiUbicacion}
-            className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white"
+            className="btn-secondary"
           >
+            <IconMapPin className="h-4 w-4" />
             Usar mi ubicación actual
           </button>
           {ubicacion.estado === "buscando" && (
-            <span className="text-xs text-slate-500">Buscando ubicación…</span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-red-600" />
+              Buscando ubicación…
+            </span>
           )}
           {ubicacion.estado === "lista" && (
-            <span className="text-xs text-emerald-700">
-              Ubicación capturada (precisión ~{ubicacion.precision} m)
+            <span className="chip bg-emerald-50 text-emerald-700">
+              <IconCheck className="h-3.5 w-3.5" />
+              Ubicación capturada (~{ubicacion.precision} m)
             </span>
           )}
           {ubicacion.estado === "error" && (
-            <span className="text-xs text-red-600">{ubicacion.mensaje}</span>
+            <span className="inline-flex items-center gap-1 text-xs text-red-600">
+              <IconAlert className="h-3.5 w-3.5 shrink-0" />
+              {ubicacion.mensaje}
+            </span>
           )}
         </div>
         <input
@@ -157,32 +174,34 @@ export default function NuevoReporteForm() {
           name="locationLabel"
           maxLength={100}
           placeholder="O escribe la dirección (ej. Calle 80 #45-12, Bogotá) — también se ubica en el mapa"
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="input mt-2"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">
+        <label htmlFor="contacto" className="label">
           Contacto (opcional)
         </label>
         <input
+          id="contacto"
           name="contact"
           maxLength={80}
           placeholder="Cómo te pueden contactar (teléfono, nombre...)"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="input"
         />
       </div>
 
-      <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
-        Este reporte será <strong>público</strong>: cualquiera podrá verlo. No
-        incluyas datos sensibles de otras personas sin su consentimiento. Si
-        es riesgo de vida inmediato, llama al <strong>123</strong>.
+      <div className="alert-warn flex items-start gap-3">
+        <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
+        <span>
+          Este reporte será <strong>público</strong>: cualquiera podrá verlo.
+          No incluyas datos sensibles de otras personas sin su consentimiento.
+          Si es riesgo de vida inmediato, llama al <strong>123</strong>.
+        </span>
       </div>
 
-      <button
-        type="submit"
-        className="w-full rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white"
-      >
+      <button type="submit" className="btn-primary w-full !py-2.5">
+        <IconSend className="h-4 w-4" />
         Publicar reporte
       </button>
     </form>

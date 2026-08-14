@@ -30,7 +30,11 @@ function getSql(): Sql {
   // El modo SSL se toma de `?sslmode=...` en la propia URL (estándar de
   // Postgres). Los proveedores gratuitos como Neon ya la incluyen en la
   // connection string que entregan.
-  sqlInstance = postgres(url);
+  //
+  // `connect_timeout` evita que la app se quede colgada indefinidamente si
+  // la base está caída o inalcanzable: mejor fallar rápido y mostrar un
+  // mensaje amigable que dejar la página cargando para siempre.
+  sqlInstance = postgres(url, { connect_timeout: 10 });
   return sqlInstance;
 }
 

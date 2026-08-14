@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `sismos-colombia-${CACHE_VERSION}`;
 
 // Rutas que deben funcionar sin conexión: guía de qué hacer, números de

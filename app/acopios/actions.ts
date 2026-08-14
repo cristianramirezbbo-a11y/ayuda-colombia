@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { moderarTexto } from "@/lib/ai";
 import {
   actualizarEstadoAcopio,
+  codigoEsValido,
   crearAcopio,
   AcopioError,
   type EstadoAcopio,
@@ -63,6 +64,14 @@ export async function desbloquearAcopioAction(formData: FormData) {
   const codigo = String(formData.get("codigo") ?? "").trim();
 
   if (Number.isFinite(id) && codigo) {
+    // Solo se desbloquea el panel si el código es realmente de este acopio;
+    // un código incorrecto NO debe mostrar el panel de administración
+    // (antes lo mostraba y los cambios de estado fallaban en silencio).
+    const valido = await codigoEsValido(id, codigo);
+    if (!valido) {
+      redirect(`/acopios/${id}?error=codigo_invalido`);
+    }
+
     const cookieStore = await cookies();
     cookieStore.set(cookieDelAcopio(id), codigo, {
       httpOnly: true,

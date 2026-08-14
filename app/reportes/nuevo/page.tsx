@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import NuevoReporteForm from "@/components/NuevoReporteForm";
+import { IconAlert } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Nuevo reporte — Sismos Colombia",
@@ -13,21 +14,19 @@ export default async function NuevoReportePage(
   const error = typeof searchParams.error === "string" ? searchParams.error : null;
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <NavBar />
-      <header className="bg-slate-900 text-white">
-        <div className="mx-auto max-w-5xl px-4 py-6">
-          <h1 className="text-2xl font-bold">Nuevo reporte</h1>
-          <p className="text-sm text-slate-300">
-            Visible públicamente en el mapa de ayuda.
-          </p>
-        </div>
-      </header>
+    <main>
+      <PageHeader
+        backHref="/reportes"
+        backLabel="Mapa de ayuda"
+        title="Nuevo reporte"
+        subtitle="Visible públicamente en el mapa de ayuda."
+      />
 
       <section className="mx-auto max-w-2xl space-y-4 px-4 py-6">
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+          <div className="alert-error flex items-start gap-3">
+            <IconAlert className="mt-0.5 h-5 w-5 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
         <NuevoReporteForm />
