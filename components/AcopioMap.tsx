@@ -7,10 +7,16 @@ import { ESTADO_ACOPIO_INFO, type Acopio } from "@/lib/acopios-types";
 
 const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-export default function AcopioMap({ acopios }: { acopios: Acopio[] }) {
+interface AcopioMapProps {
+  acopios: Acopio[];
+  userLocation?: { lat: number; lon: number } | null;
+}
+
+export default function AcopioMap({ acopios, userLocation }: AcopioMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -73,6 +79,31 @@ export default function AcopioMap({ acopios }: { acopios: Acopio[] }) {
       );
     }
   }, [acopios]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    userMarkerRef.current?.remove();
+    userMarkerRef.current = null;
+
+    if (!userLocation) return;
+
+    const el = document.createElement("div");
+    el.style.width = "16px";
+    el.style.height = "16px";
+    el.style.borderRadius = "50%";
+    el.style.background = "#2563eb";
+    el.style.border = "3px solid white";
+    el.style.boxShadow = "0 0 0 4px rgba(37,99,235,0.3)";
+
+    userMarkerRef.current = new maplibregl.Marker({ element: el })
+      .setLngLat([userLocation.lon, userLocation.lat])
+      .setPopup(new maplibregl.Popup({ offset: 20 }).setHTML("<strong>Tú estás aquí</strong>"))
+      .addTo(map);
+
+    map.flyTo({ center: [userLocation.lon, userLocation.lat], zoom: 12 });
+  }, [userLocation]);
 
   return (
     <div
